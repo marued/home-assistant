@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# .whl
+pocketsphinx*.whl
+PyAudio*.whl
+
+# poetry
+poetry.lock
+poetry.toml
