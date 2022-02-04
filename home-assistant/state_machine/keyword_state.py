@@ -1,6 +1,5 @@
 from typing import Any
-from dependency_injector.wiring import Provide, inject
-import time
+from dependency_injector.wiring import inject
 from functools import partial
 
 from .IState import IState
@@ -12,30 +11,33 @@ class ListenForKeywordState(IState):
     def __init__(
         self,
         keyword: str,
-        interpreter: SphinxInterpreter = None,
+        interpreter: SphinxInterpreter,
         activation_state: IState = None,
     ) -> None:
         super().__init__()
         self.keyword = keyword
-        self.interpreter: SphinxInterpreter = (
-            SphinxInterpreter() if interpreter is None else interpreter
-        )
+        self.interpreter = interpreter
         self.activation_state: IState = activation_state
         self.activation_state.set_fallback_state(self)
 
-    def interpret_sound(self, recognizer: Any, audio: Any):
+    def interpret_sound(self, state_machine, audio: Any):
         if audio is not None:
-            text = self.interpreter.speech_recognition(recognizer, audio)
+            text = self.interpreter.speech_recognition(audio)
             if text.lower() == self.keyword.lower():
                 print("{} at your service. Actively listening...".format(self.keyword))
-                self.stop_listening(wait_for_stop=False)
-                return self.activation_state.handle()
+                return state_machine.change_state(self.activation_state)
 
-    def handle(self) -> "IState":
+    def handle(self, state_machine) -> "IState":
         """
         Listen and dispatch.
         """
         print("Listening...")
-        self.stop_listening = self.interpreter.async_listen(self.interpret_sound)
-        for _ in range(500): time.sleep(0.1)
-        self.stop_listening(wait_for_stop=False)
+        try:
+            audio = self.interpreter.listen()
+            self.interpret_sound(state_machine, audio)
+        except Exception as e:
+            print(e)
+
+    def exit(self) -> "IState":
+        pass
+        # self.stop_listening(wait_for_stop=False)

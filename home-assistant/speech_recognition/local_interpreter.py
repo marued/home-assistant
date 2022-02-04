@@ -1,6 +1,7 @@
 from typing import Any
 import sounddevice as sd
 import speech_recognition as sr
+from dependency_injector.wiring import inject
 
 RATE = 16000
 language_code = "en-US"  # a BCP-47 language tag
@@ -11,26 +12,37 @@ sd.default.channels = 2
 
 
 class SphinxInterpreter:
-    def __init__(self) -> None:
+    @inject
+    def __init__(self, timeout=5, phrase_time_limit=10) -> None:
         self.recognizer = sr.Recognizer()
         self.mic = sr.Microphone(sample_rate=fs)
+        self.timeout = timeout
+        self.phrase_time_limit = phrase_time_limit
         with self.mic as source:
             self.recognizer.adjust_for_ambient_noise(source)
 
-    def listen(self):
-        return self.recognizer.listen(self.mic)
+    def listen(self, timeout=None, phrase_time_limit=None):
+        timeout = timeout if timeout is not None else self.timeout
+        phrase_time_limit = (
+            phrase_time_limit
+            if phrase_time_limit is not None
+            else self.phrase_time_limit
+        )
+        with self.mic as source:
+            return self.recognizer.listen(source, timeout, phrase_time_limit)
 
     def async_listen(self, call_back) -> Any:
-        stop_listening = self.recognizer.listen_in_background(self.mic, call_back)
+        with self.mic as source:
+            stop_listening = self.recognizer.listen_in_background(source, call_back)
         return stop_listening
 
-    def speech_recognition(self, recognizer: sr.Recognizer, audio: Any) -> str:
+    def speech_recognition(self, audio: Any) -> str:
         """
         Uses recognize_sphinx from speech_recognition lib.
         """
         speech_to_text = None
         try:
-            speech_to_text = recognizer.recognize_sphinx(audio)
+            speech_to_text = self.recognizer.recognize_sphinx(audio)
             print("Sphinx thinks you said: " + speech_to_text)
         except sr.UnknownValueError:
             print("Sphinx could not understand audio")
