@@ -135,3 +135,4 @@ PyAudio*.whl
 # poetry
 poetry.lock
 poetry.toml
+open_cam_config.yml

@@ -20,6 +20,7 @@ pyaudio = {path = "PyAudio-0.2.11-cp39-cp39-win_amd64.whl"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
+paramiko = "^2.9.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

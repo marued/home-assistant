@@ -3,7 +3,7 @@ from typing import Any, List, Mapping
 import numpy as np
 import time
 from functools import partial
-
+from ..commands.command_executer import CommandExecuter
 from .IState import IState
 
 
@@ -11,30 +11,19 @@ class ActivationState(IState):
     @inject
     def __init__(
         self,
-        commands: Mapping[str, Any],
+        command_executer: CommandExecuter,
         interpreter: Any,
-        sentence_matching_model: Any,
         number_of_tries: int = 3,
     ) -> None:
         super().__init__()
         self.interpreter = interpreter
         self.number_of_tries = number_of_tries
         self.fallback_state: IState = None
-        self.sentence_matching_model: Any = sentence_matching_model
         self.command_str_list: List[str] = []
         self.command_emb_list: List[np.array] = np.array([])
-        self.commands = commands
+        self.command_executer = command_executer
         self.yes_and_no = ["yes", "no"]
-        self.update_commands(commands)
-
-    def update_commands(self, commands: Mapping[str, Any]):
-        self.commands = commands
-        self.command_str_list = list(commands.keys())
-        if len(self.command_str_list) > 0:
-            self.command_emb_list = self.sentence_matching_model.get_embeddings(
-                self.command_str_list
-            )
-        self.yes_and_no_emb = self.sentence_matching_model.get_embeddings(
+        self.yes_and_no_emb = command_executer.sentence_matching_model.get_embeddings(
             self.yes_and_no
         )
 
@@ -58,22 +47,20 @@ class ActivationState(IState):
             print("Unable to hear. Please call me again when you need me.")
             return state_machine.fall_back()
         else:
-            values = self.sentence_matching_model.match(
-                self.command_str_list, self.command_emb_list, query
-            )
+            query_result = self.command_executer.match(query)
 
-            if len(values) > 0 and values[0][1] > 0.5:
-                # Execute command calback
-                self.commands.get(values[0][0])()
+            if len(query_result) > 0 and query_result[0][1] > 0.5:
+                verbal_command = query_result[0][0]
+                self.command_executer.execute(verbal_command)
             else:
-                print("Did you mean: '{}'?".format(values[0][0]))
+                print("Did you mean: '{}'?".format(query_result[0][0]))
                 awnser = self.listen_to_command()
-                yes_or_no = self.sentence_matching_model.match(
+                yes_or_no = self.command_executer.sentence_matching_model.match(
                     self.yes_and_no, self.yes_and_no_emb, awnser
                 )
-                if yes_or_no[0][0].lower() == "yes" and yes_or_no[0][1] > 0.8:
-                    # Execute command calback
-                    self.commands.get(values[0][0])()
+                if yes_or_no[0][0].lower() == "yes" and yes_or_no[0][1] > 0.7:
+                    verbal_command = query_result[0][0]
+                    self.command_executer.execute(verbal_command)
                 else:
                     print("Sorry I was not able to help.... :'( ")
 
