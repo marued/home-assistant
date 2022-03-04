@@ -7,7 +7,7 @@ from .state_machine import (
     state_machine as stm,
 )
 from .speech_recognition import local_interpreter, sentence_matching
-from .commands import command_executer, open_cam
+from .commands import command_executer, open_cam, close_cam
 
 
 class AppContainer(containers.DeclarativeContainer):
@@ -19,17 +19,21 @@ class AppContainer(containers.DeclarativeContainer):
     matching_model = providers.Singleton(sentence_matching.MatchingTransformerModel)
 
     # Declaring Commands
-    open_cam = providers.Factory(
-        open_cam.OpenCam,
-        command_str="Open Cam",
+    close_cam = providers.ThreadSafeSingleton(
+        close_cam.CloseCam,
+        command_str="Close Camera",
         type=command_executer.COMMAND_TYPES.OBJECT,
     )
+    open_cam = providers.ThreadSafeSingleton(
+        open_cam.OpenCam,
+        command_str="Open Camera",
+        type=command_executer.COMMAND_TYPES.OBJECT,
+        close_cam=close_cam
+    )
     executer = providers.ThreadSafeSingleton(
-        command_executer.CommandExecuter, 
-        sentence_matching_model=matching_model, 
-        command_objects = providers.List(
-            open_cam
-        )
+        command_executer.CommandExecuter,
+        sentence_matching_model=matching_model,
+        command_objects=providers.List(open_cam, close_cam),
     )
 
     # Declaring app states

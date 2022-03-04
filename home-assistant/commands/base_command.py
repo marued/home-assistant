@@ -20,7 +20,7 @@ class BaseCommand:
     ) -> None:
         self.command_str = command_str
         self.type = type
-        self.ftc = fct
+        self.fct = fct
 
     def execute(self):
         self.fct()

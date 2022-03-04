@@ -23,7 +23,9 @@ default_commands = zip(
 
 class CommandExecuter:
     @inject
-    def __init__(self, sentence_matching_model, command_objects: List[BaseCommand]) -> None:
+    def __init__(
+        self, sentence_matching_model, command_objects: List[BaseCommand]
+    ) -> None:
         self.sentence_matching_model = sentence_matching_model
         self.commands: List[BaseCommand] = []
         self.verbal_command_list: List[str] = []
@@ -36,18 +38,20 @@ class CommandExecuter:
         self, new_commands: List[Tuple[str, partial]]
     ) -> Mapping[str, Any]:
         for cmd_str, fct in new_commands:
-            self.commands.append(BaseCommand(
-                cmd_str, COMMAND_TYPES.FCT, fct
-            ))
+            self.commands.append(BaseCommand(cmd_str, COMMAND_TYPES.FCT, fct))
             self.verbal_command_list.append(cmd_str)
-        self.embeddings = self.sentence_matching_model.get_embeddings(self.verbal_command_list) 
+        self.embeddings = self.sentence_matching_model.get_embeddings(
+            self.verbal_command_list
+        )
 
     def add_command(self, command: BaseCommand, force: bool = False) -> bool:
-        #if self.commands.get(command.command_str) is not None and not force:
+        # if self.commands.get(command.command_str) is not None and not force:
         #    return False
         self.commands.append(command)
         self.verbal_command_list.append(command.command_str)
-        self.embeddings = self.sentence_matching_model.get_embeddings(self.verbal_command_list) 
+        self.embeddings = self.sentence_matching_model.get_embeddings(
+            self.verbal_command_list
+        )
         return True
 
     def get_commands_str(self) -> List[str]:
