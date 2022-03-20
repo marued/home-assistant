@@ -7,7 +7,7 @@ from .state_machine import (
     state_machine as stm,
 )
 from .speech_recognition import local_interpreter, sentence_matching
-from .commands import command_executer, open_cam, close_cam, open_webpage, set_timer
+from .commands import command_executer, open_cam, close_cam, open_webpage, set_timer, maps_command
 from .text_to_speech import computer_voice
 
 
@@ -42,6 +42,11 @@ class AppContainer(containers.DeclarativeContainer):
         command_str=["Open web page", "Search for", "Open Google search."],
         type=command_executer.COMMAND_TYPES.OBJECT,
     )
+    maps = providers.Factory(
+        maps_command.SearchGoogleMaps,
+        command_str=["Find nearest", "Find route", "Get directions to"],
+        type=command_executer.COMMAND_TYPES.OBJECT,
+    )
     timer = providers.ThreadSafeSingleton(
         set_timer.SetTimer,
         command_str="Set timer",
@@ -50,7 +55,7 @@ class AppContainer(containers.DeclarativeContainer):
     executer = providers.ThreadSafeSingleton(
         command_executer.CommandExecuter,
         sentence_matching_model=matching_model,
-        command_objects=providers.List(open_cam, close_cam, web_page, timer),
+        command_objects=providers.List(open_cam, close_cam, web_page, maps, timer),
     )
 
     # Declaring app states
