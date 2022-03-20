@@ -1,10 +1,17 @@
-class IState:
-    def __init__(self) -> None:
-        pass
+from typing import Any
 
-    def handle(self, state_machine) -> "IState":
+
+class IState:
+    def __init__(self, computer_voice: Any = None):
+        self.computer_voice = computer_voice
+
+    def handle(self, state_machine: Any) -> "IState":
         raise NotImplementedError("Handle is not implemented yet.")
-        return self
 
     def exit(self):
         return self
+
+    def say(self, text: str):
+        print(text)
+        if self.computer_voice is not None:
+            self.computer_voice.say(text)

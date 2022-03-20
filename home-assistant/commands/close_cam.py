@@ -14,7 +14,7 @@ class CloseCam(BaseCommand):
         super().__init__(command_str, type, fct)
         self.terminate_fct = None
 
-    def execute(self):
+    def execute(self, command_text: str = None):
         # TODO: use config...
         if self.terminate_fct is not None:
             self.terminate_fct()

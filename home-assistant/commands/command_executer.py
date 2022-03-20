@@ -8,14 +8,9 @@ import numpy as np
 from .base_command import BaseCommand, COMMAND_TYPES
 
 default_commands = zip(
+    ["Exit program", "Quit program"],
     [
-        "Open web page.",
-        "Set timer.",
-        "Exit program.",
-    ],
-    [
-        partial(print, "\n Opening web Page.\n"),
-        partial(print, "\n Setting timer.\n"),
+        partial(sys.exit),
         partial(sys.exit),
     ],
 )
@@ -47,11 +42,18 @@ class CommandExecuter:
     def add_command(self, command: BaseCommand, force: bool = False) -> bool:
         # if self.commands.get(command.command_str) is not None and not force:
         #    return False
-        self.commands.append(command)
-        self.verbal_command_list.append(command.command_str)
-        self.embeddings = self.sentence_matching_model.get_embeddings(
-            self.verbal_command_list
-        )
+        def __add__(self, command, command_str):
+            self.commands.append(command)
+            self.verbal_command_list.append(command_str)
+            self.embeddings = self.sentence_matching_model.get_embeddings(
+                self.verbal_command_list
+            )
+
+        if type(command.command_str) == list:
+            for command_str in command.command_str:
+                __add__(self, command, command_str)
+        else:
+            __add__(self, command, command.command_str)
         return True
 
     def get_commands_str(self) -> List[str]:
@@ -64,10 +66,14 @@ class CommandExecuter:
         )
         return query_result
 
-    def execute(self, command_str: str):
+    def execute(self, command_str: str, query: str):
         try:
             command_idx = self.verbal_command_list.index(command_str)
-            self.commands[command_idx].execute()
+            if self.commands[command_idx].type == COMMAND_TYPES.OBJECT:
+                self.commands[command_idx].execute(query)
+            else:
+                self.commands[command_idx].execute()
+
         except ValueError as ve:
             print(ve)
         # if command.type == COMMAND_TYPES.FCT:
