@@ -19,7 +19,7 @@ $ poetry run python -m home-assistant
 Once it's started, the default voice activation command is 'Hello Charlie'. 
 
 ## Windows installation
-Some of the packages are not always installed properly on windows and may cause errors. The fallowing packages can be found on the following links and installed by referencing the .whl file downloaded manually.
+Some of the packages are not always installed properly on windows and may cause errors. The following packages can be found on the following links and installed by referencing the .whl file downloaded manually.
 ### Pocketsphinx: Sound to text
 Get the .whl here for windows:
 https://www.lfd.uci.edu/~gohlke/pythonlibs/#pocketsphinx

@@ -22,5 +22,7 @@ class SearchGoogleMaps(BaseCommand):
         elif idx_to != -1:
             search_text = command_text[idx_to + 3 :]
         webbrowser.open_new_tab(
-            "https://www.google.com/maps/search/{}".format(search_text.replace(" ", "+"))
+            "https://www.google.com/maps/search/{}".format(
+                search_text.replace(" ", "+")
+            )
         )
