@@ -22,6 +22,7 @@ Once it's started, the default voice activation command is 'Hello Charlie'.
 
 ## Windows installation
 Some of the packages are not always installed properly on windows and may cause errors. The following packages can be found on the following links and installed by referencing the `.whl` files downloaded manually.
+
 ### Pocketsphinx: Sound to text
 Get the `.whl` file [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pocketsphinx).
 
